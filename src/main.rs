@@ -77,8 +77,8 @@ fn main() -> Result<(), Box<dyn Error>> {
             while event::poll(Duration::default())? {
                 if let Event::Key(key_event) = event::read()? {
                     match key_event.code {
-                        KeyCode::Up => menu.change_option(true),
-                        KeyCode::Down => menu.change_option(false),
+                        KeyCode::Char('w') | KeyCode::Up => menu.change_option(true),
+                        KeyCode::Char('s') | KeyCode::Down => menu.change_option(false),
                         KeyCode::Char(' ') | KeyCode::Enter => {
                             if menu.selection == 0 {
                                 in_menu = false;
@@ -101,8 +101,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         while event::poll(Duration::default())? {
             if let Event::Key(key_event) = event::read()? {
                 match key_event.code {
-                    KeyCode::Left => player.move_left(),
-                    KeyCode::Right => player.move_right(),
+                    KeyCode::Char('a') |KeyCode::Left => player.move_in_direction(-1),
+                    KeyCode::Char('d') |KeyCode::Right => player.move_in_direction(1),
                     KeyCode::Char(' ') | KeyCode::Enter => {
                         if player.shoot() {
                             audio.play("pew");

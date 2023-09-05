@@ -20,14 +20,19 @@ impl Player {
             shots: Vec::new(),
         }
     }
-    pub fn move_left(&mut self) {
-        if self.x > 0 {
-            self.x -= 1;
-        }
-    }
-    pub fn move_right(&mut self) {
-        if self.x < NUM_COLS - 1 {
-            self.x += 1;
+    pub fn move_in_direction(&mut self, direction: i32) {
+        match direction {
+            -1 => {
+                if self.x > 0 {
+                    self.x -= 1;
+                }
+            },
+            1 => {
+                if self.x < NUM_COLS - 1 {
+                    self.x += 1;
+                }
+            },
+            _ => {},
         }
     }
     pub fn shoot(&mut self) -> bool {
