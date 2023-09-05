@@ -5,15 +5,17 @@ use std::time::Duration;
 pub struct Shot {
     pub x: usize,
     pub y: usize,
+    pub builds_meter: bool,
     pub exploding: bool,
     timer: Timer,
 }
 
 impl Shot {
-    pub fn new(x: usize, y: usize) -> Self {
+    pub fn new(x: usize, y: usize, builds_meter: bool) -> Self {
         Self {
             x,
             y,
+            builds_meter,
             exploding: false,
             timer: Timer::from_millis(50),
         }

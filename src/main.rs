@@ -19,7 +19,7 @@ use invaders::{
     menu::Menu,
     player::Player,
     render,
-    score::Score,
+    score::Score, supermeter::SuperMeter,
 };
 
 fn render_screen(render_rx: Receiver<Frame>) {
@@ -32,10 +32,12 @@ fn render_screen(render_rx: Receiver<Frame>) {
     }
 }
 
-fn reset_game(in_menu: &mut bool, player: &mut Player, invaders: &mut Invaders) {
+fn reset_game(in_menu: &mut bool, player: &mut Player, invaders: &mut Invaders, score: &mut Score, super_meter: &mut SuperMeter) {
     *in_menu = true;
     *player = Player::new();
     *invaders = Invaders::new();
+    *score = Score::new();
+    *super_meter = SuperMeter::new();
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -65,6 +67,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut menu = Menu::new();
     let mut in_menu = true;
     let mut level = Level::new();
+    let mut super_meter = SuperMeter::new();
 
     'gameloop: loop {
         // Per-frame init
@@ -103,6 +106,12 @@ fn main() -> Result<(), Box<dyn Error>> {
                 match key_event.code {
                     KeyCode::Char('a') |KeyCode::Left => player.move_in_direction(-1),
                     KeyCode::Char('d') |KeyCode::Right => player.move_in_direction(1),
+                    KeyCode::Char('f') => {
+                        if super_meter.super_ready {
+                            player.unleash_super();
+                            super_meter.reset();
+                        }
+                    },
                     KeyCode::Char(' ') | KeyCode::Enter => {
                         if player.shoot() {
                             audio.play("pew");
@@ -110,7 +119,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     }
                     KeyCode::Esc | KeyCode::Char('q') => {
                         audio.play("lose");
-                        reset_game(&mut in_menu, &mut player, &mut invaders);
+                        reset_game(&mut in_menu, &mut player, &mut invaders, &mut score, &mut super_meter);
                     }
                     _ => {}
                 }
@@ -119,17 +128,18 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         // Updates
         player.update(delta);
+        super_meter.update(delta);
         if invaders.update(delta) {
             audio.play("move");
         }
-        let hits: u16 = player.detect_hits(&mut invaders);
+        let hits: u16 = player.detect_hits(&mut invaders, &mut super_meter);
         if hits > 0 {
             audio.play("explode");
             score.add_points(hits);
         }
-        // Draw & render
 
-        let drawables: Vec<&dyn Drawable> = vec![&player, &invaders, &score, &level];
+        // Draw & render
+        let drawables: Vec<&dyn Drawable> = vec![&player, &invaders, &score, &level, &super_meter];
         for drawable in drawables {
             drawable.draw(&mut curr_frame);
         }
@@ -145,7 +155,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             invaders = Invaders::new();
         } else if invaders.reached_bottom() {
             audio.play("lose");
-            reset_game(&mut in_menu, &mut player, &mut invaders);
+            reset_game(&mut in_menu, &mut player, &mut invaders, &mut score, &mut super_meter);
         }
     }
 
