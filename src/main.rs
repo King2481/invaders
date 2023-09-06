@@ -32,12 +32,13 @@ fn render_screen(render_rx: Receiver<Frame>) {
     }
 }
 
-fn reset_game(in_menu: &mut bool, player: &mut Player, invaders: &mut Invaders, score: &mut Score, super_meter: &mut SuperMeter) {
+fn reset_game(in_menu: &mut bool, player: &mut Player, invaders: &mut Invaders, score: &mut Score, super_meter: &mut SuperMeter, level: &mut Level) {
     *in_menu = true;
     *player = Player::new();
     *invaders = Invaders::new();
     *score = Score::new();
     *super_meter = SuperMeter::new();
+    *level = Level::new();
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -110,6 +111,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                         if super_meter.super_ready {
                             player.unleash_super();
                             super_meter.reset();
+                            audio.play("pew");
                         }
                     },
                     KeyCode::Char(' ') | KeyCode::Enter => {
@@ -119,7 +121,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     }
                     KeyCode::Esc | KeyCode::Char('q') => {
                         audio.play("lose");
-                        reset_game(&mut in_menu, &mut player, &mut invaders, &mut score, &mut super_meter);
+                        reset_game(&mut in_menu, &mut player, &mut invaders, &mut score, &mut super_meter, &mut level);
                     }
                     _ => {}
                 }
@@ -155,7 +157,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             invaders = Invaders::new();
         } else if invaders.reached_bottom() {
             audio.play("lose");
-            reset_game(&mut in_menu, &mut player, &mut invaders, &mut score, &mut super_meter);
+            reset_game(&mut in_menu, &mut player, &mut invaders, &mut score, &mut super_meter, &mut level);
         }
     }
 
