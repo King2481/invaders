@@ -4,10 +4,16 @@ use crate::{
 };
 use rusty_time::timer::Timer;
 use std::{cmp::max, time::Duration};
+use rand::Rng;
+
+const RARE_ENEMY_CHANCE: usize = 15;
+const RARE_POINTS: u16 = 5;
+const NORMAL_POINTS: u16 = 1;
 
 pub struct Invader {
     pub x: usize,
     pub y: usize,
+    is_rare: bool,
     points: u16,
 }
 
@@ -30,7 +36,10 @@ impl Invaders {
                     && (x % 2 == 0)
                     && (y % 2 == 0)
                 {
-                    army.push(Invader { x, y, points: 1 });
+                    let is_rare: bool = rand::thread_rng().gen_range(0..100) <= RARE_ENEMY_CHANCE;
+                    let points = if is_rare { RARE_POINTS } else { NORMAL_POINTS };
+
+                    army.push(Invader { x, y, is_rare, points});
                 }
             }
         }
@@ -109,9 +118,9 @@ impl Drawable for Invaders {
                 / self.move_timer.duration.as_secs_f32())
                 > 0.5
             {
-                'x'
+                if invader.is_rare {'o'} else {'x'}
             } else {
-                '+'
+                if invader.is_rare {'0'} else {'+'}
             }
         }
     }
